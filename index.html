@@ -33,10 +33,48 @@
 <div>
 
 <h2 align="middle">Overview</h2>
-<p>In this project we go through various steps of cloth simulation. We start by building the mesh for the cloth, composed of point masses and springs between the masses. The springs are what give the cloth structure and keep the masses together. We then go into simulating the cloth falling. This is accomplished by calculating the net force through external forces and spring forces, and the movement of the masses in response to the net force. [part 3]. Next, we handled self-collisions by detecting if points are within a threshold and applying a correction vector if the points meet the threshold. [part 5]
+<p>In this project we go through various steps of cloth simulation. We start by building the mesh for the cloth, composed of point masses and springs between the masses. The springs are what give the cloth structure and keep the masses together. We then go into simulating the cloth falling. This is accomplished by calculating the net force through external forces and spring forces, and the movement of the masses in response to the net force. Next we take care of collisions with surfaces like the sphere and the plane. We calculate whether or not the cloth passes the surface, and if it does we use a correction vector to push it back out of the surface on top of it. This creates the affect that materials cannot morph into one another like a ghost would. Next, we handled self-collisions by detecting if points are within a threshold and applying a correction vector if the points meet the threshold. Lastly, we we used GLSL to implement diffuse shading, blinn-phong shading, texture mapping, bump and displacement mapping, and environment mapped reflections on our beloved cloth. We take different inputs and constants of the scene like normals, positions, mappings, ect. and use it to output the lighting and positions of vertexes in order to create different affects for the surfaces and cloths.  
 </p>
 
+
 <h2 align="middle">Part I: Masses and springs</h2>
+
+  <p>In this part we created a point mass grid for the cloth where we added structural, bending and shearing constraints between the point masses to mimic the physics of real cloth. Below are examples of the resultant point mass grid creation </p>
+
+  <h3 align="middle">Cloth Wireframe pinned2.json</h3>
+
+  <div align="middle">
+    <table style="width=100%">
+      <tr>
+        <td>
+          <img src="images/WireFrame.png" align="middle" width="400px" />
+          <figcaption align="middle">Wireframe</figcaption>
+        </td>
+        <td>
+          <img src="images/WireFrame2.png" align="middle" width="400px" />
+          <figcaption align="middle">Red Wireframe</figcaption>
+        </td>
+      </tr>
+      <br>
+      <tr>
+        <td>
+          <img src="images/NoShearing.png" align="middle" width="400px" />
+          <figcaption align="middle">Without Shearing Constraint</figcaption>
+        </td>
+        <td>
+          <img src="images/OnlyShearing.png" align="middle" width="400px" />
+          <figcaption align="middle">With Only Shearing Constraint</figcaption>
+        </td>
+      </tr>
+      <br>
+      <tr>
+        <td>
+          <img src="images/AllConstraints.png" align="middle" width="400px" />
+          <figcaption align="middle">With All Constraints</figcaption>
+        </td>
+      </tr>
+    </table>
+  </div>
 
 <h2 align="middle">Part II: Simulation via numerical integration</h2>
 
@@ -100,7 +138,62 @@
   <p>pinned4.jpg</p>
 </div>
 <br>
-<h2 align="middle">Part III: Handling collisions with other objects</h2>
+
+
+
+
+      <h2 align="middle">Part 3: Handling collisions with other objects</h2>
+
+        <p>When handling collisions with the sphere and plane, we basically check if the point mass is within the sphere or within the plane, and if it is, we correct this by pushing it back out with a correction vector we calculate.</p>
+
+        <h3 align="middle">Cloth On sphere.json Using ks = 500, 5000, and 50000</h3>
+
+        <div align="middle">
+          <table style="width=100%">
+            <tr>
+              <td>
+                <img src="images/ks500.png" align="middle" width="400px" />
+                <figcaption align="middle">ks = 500</figcaption>
+              </td>
+              <td>
+                <img src="images/ks5000.png" align="middle" width="400px" />
+                <figcaption align="middle">ks = 5000</figcaption>
+              </td>
+            </tr>
+            <br>
+            <tr>
+              <td>
+                <img src="images/ks500000.png" align="middle" width="400px" />
+                <figcaption align="middle">ks = 50000</figcaption>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+        <p> We can see here, that as we increase "ks"- the spring constant- the cloth becomes more stiff almost as if the cloth is becoming thicker or more rigid. The forces pulling the point masses together get stronger.</p>
+
+        <h3 align="middle">Cloth Lying Peacefully at Rest on the Plane</h3>
+
+        <div align="middle">
+          <table style="width=100%">
+            <tr>
+              <td>
+                <img src="images/GreenCloth.png" align="middle" width="400px" />
+                <figcaption align="middle">Green Shaded Cloth</figcaption>
+              </td>
+              <td>
+                <img src="images/WireFrameCloth.png" align="middle" width="400px" />
+                <figcaption align="middle">Wireframe Cloth</figcaption>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+
+
+
+
+
 
 <h2 align="middle">Part IV: Handling self-collisions</h2>
 
@@ -161,6 +254,162 @@
     </tr>
   </table>
 </div>
+
+
+
+
+
+
+
+
+<h2 align="middle">Part V: Shaders</h2>
+
+  <p>Here we used GLSL to implement diffuse shading, blinn-phong shading, texture mapping, bump and displacement mapping, and environment mapped reflections on our beloved cloth. The shader program has a .vert file- the vertex shader- which reads and writes per-vertex values. Connecting to these .vert files are the fragment shader (.frag files). A .frag files defaults to connecting to Default.vert if there is no corresponding .vert file to connect to. We have inputs into the vertex shaders (position, normal, uv coordinates) which help us determine the shade of that vertex. Also, we have uniform, constant attributes of the system shared by all instances that help us calculate shades as well. In fragment shaders, we use these inputs to write out to the variables out_color. Then, in vertex shaders we write out the final positions of the vertex. Putting these together we are able to create different lighting and material affects by manipulating the out variables according to the in variables.</p>
+
+  <h3 align="middle">Blinn-Phong Shader Broken Down into Ambient, Diffuse, and Specular</h3>
+
+  <div align="middle">
+    <table style="width=100%">
+      <tr>
+        <td>
+          <img src="images/AmbientOnly.png" align="middle" width="400px" />
+          <figcaption align="middle">Ambient Component Only</figcaption>
+        </td>
+        <td>
+          <img src="images/DiffuseOnly.png" align="middle" width="400px" />
+          <figcaption align="middle">Diffuse Component Only</figcaption>
+        </td>
+      </tr>
+      <br>
+      <tr>
+        <td>
+          <img src="images/SpecularOnly.png" align="middle" width="400px" />
+          <figcaption align="middle">Specular Component Only</figcaption>
+        </td>
+        <td>
+          <img src="images/EntirePhong.png" align="middle" width="400px" />
+          <figcaption align="middle">Entire Blinn-Phong Model</figcaption>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <p>In Blinn-Phong shading, we combine three different lighting components- ambient lighting, diffuse lighting, and specular lighting. Ambient shading does not depend on anything, its a constant color which accounts for disregarded illumination. Diffuse shading is the flat, general color of something when light illuminates it. Specular shading is where the light only reflects when the outgoing light is close to the mirror direction- or half vector. This attributes to the shine we see in objects in real life. </p>
+
+  <h3 align="middle">Texture Map Shader Obama.png</h3>
+
+  <div align="middle">
+    <table style="width=100%">
+      <tr>
+        <td>
+          <img src="images/texture_1.png" align="middle" width="400px" />
+          <figcaption align="middle">The Texture</figcaption>
+        </td>
+        <td>
+          <img src="images/ObamaTextureMap1.png" align="middle" width="400px" />
+          <figcaption align="middle">Before Cloth Dropped</figcaption>
+        </td>
+      </tr>
+      <br>
+      <tr>
+        <td>
+          <img src="images/ObamaTextureMap2.png" align="middle" width="400px" />
+          <figcaption align="middle">After Cloth Dropped</figcaption>
+        </td>
+        <td>
+          <img src="images/ObamaTextureMap3.png" align="middle" width="400px" />
+          <figcaption align="middle">After Cloth Dropped V2</figcaption>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+
+  <h3 align="middle">Bump and Displacement Mapping (Brick Texture)</h3>
+
+  <div align="middle">
+    <table style="width=100%">
+      <tr>
+        <td>
+          <img src="images/BumpBefore.png" align="middle" width="400px" />
+          <figcaption align="middle">Bump Mapping Before</figcaption>
+        </td>
+        <td>
+          <img src="images/BumpAfter.png" align="middle" width="400px" />
+          <figcaption align="middle">Bump Mapping After</figcaption>
+        </td>
+      </tr>
+      <br>
+      <tr>
+        <td>
+          <img src="images/DisplaceBefore.png" align="middle" width="400px" />
+          <figcaption align="middle">Displacement Mapping Before</figcaption>
+        </td>
+        <td>
+          <img src="images/DisplaceAfterV2.png" align="middle" width="400px" />
+          <figcaption align="middle">Displacement Mapping After</figcaption>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <p>Above we see bump mapping and displacement mapping. Bump mapping shades according to the surface normals of the texture. Where in displacement mapping, it uses bump mapping, but we also change the position of the vertices to according to the height map. In displacement, we are changing the structure of the texture in addition to the change in the lighting. As we can see above, the bump mapping has the shading/lighting of grey bricks, but the displacement changes the structure of the cloth based on the texture of bricks. </p>
+
+  <h3 align="middle">Changing the Sphere Mesh's Coarseness</h3>
+
+  <div align="middle">
+    <table style="width=100%">
+      <tr>
+        <td>
+          <img src="images/Bump16.png" align="middle" width="400px" />
+          <figcaption align="middle">Bump Mapping - Coarseness 16</figcaption>
+        </td>
+        <td>
+          <img src="images/Displace16V2.png" align="middle" width="400px" />
+          <figcaption align="middle">Displacement Mapping - Coarseness 16</figcaption>
+        </td>
+      </tr>
+      <br>
+      <tr>
+        <td>
+          <img src="images/Bump128.png" align="middle" width="400px" />
+          <figcaption align="middle">Bump Mapping - Coarseness 128</figcaption>
+        </td>
+        <td>
+          <img src="images/Displace128V2.png" align="middle" width="400px" />
+          <figcaption align="middle">Displacement Mapping - Coarseness 128</figcaption>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <p>With an increase in coarseness we see more defined, and sharper edges. The displacements and lighting at the bumps become more accentuated. I see a bigger difference in the bump mapping comparisons, as the texture looks more three dimensional as the courseness increases- even though bump mapping is just a play on lighting.</p>
+
+
+  <h3 align="middle">Mirror Shader on the Cloth and the Sphere</h3>
+
+  <div align="middle">
+    <table style="width=100%">
+      <tr>
+        <td>
+          <img src="images/MirrorBefore.png" align="middle" width="400px" />
+          <figcaption align="middle">Mirror Shader on Cloth</figcaption>
+        </td>
+        <td>
+          <img src="images/MirrorAfter.png" align="middle" width="400px" />
+          <figcaption align="middle">Mirror Shader on Sphere</figcaption>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+
+
+
+
+
+
+
 
 </body>
 </html>
