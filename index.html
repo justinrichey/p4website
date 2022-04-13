@@ -1,0 +1,165 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<style>
+  body {
+    padding: 100px;
+    width: 1000px;
+    margin: auto;
+    text-align: left;
+    font-weight: 300;
+    font-family: 'Open Sans', sans-serif;
+    color: #121212;
+  }
+  h1, h2, h3, h4 {
+    font-family: 'Source Sans Pro', sans-serif;
+  }
+</style>
+<title>CS 184 Mesh Editor</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
+</head>
+
+
+<body>
+
+<h1 align="middle">CS 184: Computer Graphics and Imaging, Spring 2022</h1>
+<h1 align="middle">Project 4: Cloth Simulator</h1>
+<h2 align="middle">Justin Richey, Orion Lehrmann</h2>
+
+<br><br>
+
+<div>
+
+<h2 align="middle">Overview</h2>
+<p>In this project we go through various steps of cloth simulation. We start by building the mesh for the cloth, composed of point masses and springs between the masses. The springs are what give the cloth structure and keep the masses together. We then go into simulating the cloth falling. This is accomplished by calculating the net force through external forces and spring forces, and the movement of the masses in response to the net force. [part 3]. Next, we handled self-collisions by detecting if points are within a threshold and applying a correction vector if the points meet the threshold. [part 5]
+</p>
+
+<h2 align="middle">Part I: Masses and springs</h2>
+
+<h2 align="middle">Part II: Simulation via numerical integration</h2>
+
+<h3>Modifying ks</h3>
+<p>At a low ks, the cloth appears ‘flappier’ and, in general, has more movement as it falls down. This is due to the lower ks resulting in lower spring forces that keep the cloth together. With these forces lowered, the force from gravity has a more noticeable effect on the cloth. As the screenshots show, the cloth in the 50 ks image hangs lower and has more wrinkles, while the cloth in the 50,000 ks hangs higher in the middle and appears firmer, smoother, and more structured.</p>
+
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="images/ks50.png" align="middle" width="500px" />
+        <figcaption align="middle">ks = 50</figcaption>
+      </td>
+      <td>
+        <img src="images/ks50000.png" align="middle" width="500px" />
+        <figcaption align="middle">ks = 50000</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+
+<h3>Modifying density</h3>
+<p>Lowering the density has a similar effect as raising the spring constant. The cloth generally has more structure, and in its resting state, it has fewer wrinkles and hangs higher in the middle. As it falls, the 1 g/cm^2 cloth appears more taut than the 50 g/cm^2 cloth. The 50 g/cm^2 cloth shows more wrinkles, hangs lower in the middle, and appears less rectangular than the 1 g/cm^2 cloth. This is because a higher density results in a greater mass, and this leads to higher values for external force calculations (gravity). Gravity has a relatively greater impact on our net force, causing the relative impact of the spring forces to be lessened (leading to the described results).</p>
+
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="images/density1.png" align="middle" width="500px" />
+        <figcaption align="middle">Density = 1 g/cm^2</figcaption>
+      </td>
+      <td>
+        <img src="images/density50.png" align="middle" width="500px" />
+        <figcaption align="middle">Density = 50 g/cm^2</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+
+<h3>Modifying damping</h3>
+<p>At a low damping value, the cloth appears to fall faster and movements occur more quickly. At a higher damping value, the cloth takes longer to fall and its movements are slow. However, as you can see in both screenshots, the end result of the cloth is the same. With a higher damping value, the change in position at each time step is lowered, which is why the cloth with the higher damping value moves more slowly. However, the total force acting on each point is still the same, independent of damping.</p>
+
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="images/dampinglow.png" align="middle" width="500px" />
+        <figcaption align="middle">Damping = 0.045977</figcaption>
+      </td>
+      <td>
+        <img src="images/dampinghigh.png" align="middle" width="500px" />
+        <figcaption align="middle">Damping = 0.908046</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<br><br>
+<div align="middle">
+  <img src="images/pinned4.png" align="middle" width="500px" />
+  <br>
+  <p>pinned4.jpg</p>
+</div>
+<br>
+<h2 align="middle">Part III: Handling collisions with other objects</h2>
+
+<h2 align="middle">Part IV: Handling self-collisions</h2>
+
+<h3>Screenshots at different steps</h3>
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="images/clothfall1.png" align="middle" width="500px" />
+        <figcaption align="middle">Initial Collision</figcaption>
+      </td>
+      <td>
+        <img src="images/clothfall2.png" align="middle" width="500px" />
+        <figcaption align="middle">Middle of collisions</figcaption>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <img src="images/clothfall3.png" align="middle" width="500px" />
+        <figcaption align="middle">Resting</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+
+<h3>Modifying density</h3>
+<p>At low density, the cloth appears to have larger folds and generally less movement compared to the high density cloth. Similarly to the description given in part 2, this can be attributed to a higher density resulting in a greater mass and less relative impact from the spring forces (more from gravity). As the cloth collides with itself in the low density image, it maintains more of its structure and seems firmer. At high density, the cloth undergoes more movement, has more folds/less structure, and is more likely to meet the threshold for applying a correction vector.</p>
+
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="images/clothdens2.png" align="middle" width="500px" />
+        <figcaption align="middle">Density = 2 g/cm^2</figcaption>
+      </td>
+      <td>
+        <img src="images/clothdens80.png" align="middle" width="500px" />
+        <figcaption align="middle">Density = 80 g/cm^2</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+
+<h3>Modifying ks</h3>
+<p>At a low ks, the cloth has smaller folds and more movement compared to the cloth with a high ks. A lower ks results in lower spring forces, leading to less structure in the cloth. The result is the cloth we see – with many folds. The cloth with a high ks shows more structure and larger folds, attributed to higher spring forces that keep the cloth together. </p>
+
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="images/clothks50.png" align="middle" width="500px" />
+        <figcaption align="middle">ks = 50</figcaption>
+      </td>
+      <td>
+        <img src="images/clothks50000.png" align="middle" width="500px" />
+        <figcaption align="middle">ks = 50000</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+
+</body>
+</html>
